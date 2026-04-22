@@ -1,0 +1,39 @@
+<%- include("partials/header") %>
+
+<h2><%= empreendimento.nome %></h2>
+<p><strong>Status:</strong> <%= empreendimento.status %></p>
+<p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
+<p><%= empreendimento.descricao %></p>
+
+<h3>Documentos</h3>
+<ul>
+  <li><a href="<%= empreendimento.memorialLink %>">Memorial descritivo</a></li>
+  <li><a href="<%= empreendimento.plantaLink %>">Plantas</a></li>
+  <li><a href="<%= empreendimento.tabelaVendaLink %>">Tabela de venda</a></li>
+</ul>
+
+<h3>Unidades</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Unidade</th>
+      <th>Pavimento</th>
+      <th>Tipologia</th>
+      <th>Metragem</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% unidades.forEach(unidade => { %>
+      <tr>
+        <td><%= unidade.numero %></td>
+        <td><%= unidade.pavimento %></td>
+        <td><%= unidade.tipologia %></td>
+        <td><%= unidade.metragem %></td>
+        <td><%= unidade.status %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include("partials/footer") %>

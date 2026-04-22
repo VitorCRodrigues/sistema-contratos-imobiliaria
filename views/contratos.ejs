@@ -1,0 +1,17 @@
+<%- include("partials/header") %>
+
+<h2>Contratos</h2>
+
+<div class="cards">
+  <% contratos.forEach(contrato => { %>
+    <div class="card">
+      <h3><%= contrato.nome %></h3>
+      <p><strong>Categoria:</strong> <%= contrato.categoria %></p>
+      <p><strong>Status:</strong> <%= contrato.status %></p>
+      <p><%= contrato.descricao %></p>
+      <a class="button" href="<%= contrato.formLink %>" target="_blank">Abrir formulário</a>
+    </div>
+  <% }) %>
+</div>
+
+<%- include("partials/footer") %>

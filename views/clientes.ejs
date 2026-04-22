@@ -1,0 +1,28 @@
+<%- include("partials/header") %>
+
+<h2>Clientes</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>CPF/CNPJ</th>
+      <th>Telefone</th>
+      <th>Email</th>
+      <th>Tipo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% clientes.forEach(cliente => { %>
+      <tr>
+        <td><%= cliente.nome %></td>
+        <td><%= cliente.cpfCnpj %></td>
+        <td><%= cliente.telefone %></td>
+        <td><%= cliente.email %></td>
+        <td><%= cliente.tipo %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,28 @@
+<%- include("partials/header") %>
+
+<h2>Financeiro</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Categoria</th>
+      <th>Tipo</th>
+      <th>Valor</th>
+      <th>Observação</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% financeiro.forEach(item => { %>
+      <tr>
+        <td><%= item.data %></td>
+        <td><%= item.categoria %></td>
+        <td><%= item.tipo %></td>
+        <td>R$ <%= item.valor.toLocaleString("pt-BR") %></td>
+        <td><%= item.observacao %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,17 @@
+<%- include("partials/header") %>
+
+<h2>Empreendimentos</h2>
+
+<div class="cards">
+  <% empreendimentos.forEach(empreendimento => { %>
+    <div class="card">
+      <h3><%= empreendimento.nome %></h3>
+      <p><strong>Status:</strong> <%= empreendimento.status %></p>
+      <p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
+      <p><%= empreendimento.descricao %></p>
+      <a class="button" href="/empreendimentos/<%= empreendimento.id %>">Ver detalhes</a>
+    </div>
+  <% }) %>
+</div>
+
+<%- include("partials/footer") %>

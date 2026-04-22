@@ -1,0 +1,32 @@
+<%- include("partials/header") %>
+
+<h2>Dashboard</h2>
+
+<div class="cards">
+  <div class="card">
+    <h3>Empreendimentos</h3>
+    <p><%= totalEmpreendimentos %></p>
+  </div>
+
+  <div class="card">
+    <h3>Clientes</h3>
+    <p><%= totalClientes %></p>
+  </div>
+
+  <div class="card">
+    <h3>Contratos</h3>
+    <p><%= totalContratos %></p>
+  </div>
+
+  <div class="card">
+    <h3>Entradas</h3>
+    <p>R$ <%= totalEntradas.toLocaleString("pt-BR") %></p>
+  </div>
+
+  <div class="card">
+    <h3>Saídas</h3>
+    <p>R$ <%= totalSaidas.toLocaleString("pt-BR") %></p>
+  </div>
+</div>
+
+<%- include("partials/footer") %>
