@@ -1,32 +1,46 @@
 <%- include("partials/header") %>
 
-<h2>Dashboard</h2>
+<section class="page-header">
+  <h2>Dashboard</h2>
+  <p>Visão geral inicial do sistema interno.</p>
+</section>
 
-<div class="cards">
+<section class="cards">
   <div class="card">
     <h3>Empreendimentos</h3>
-    <p><%= totalEmpreendimentos %></p>
+    <p class="big-number"><%= totalEmpreendimentos %></p>
   </div>
 
   <div class="card">
     <h3>Clientes</h3>
-    <p><%= totalClientes %></p>
+    <p class="big-number"><%= totalClientes %></p>
   </div>
 
   <div class="card">
     <h3>Contratos</h3>
-    <p><%= totalContratos %></p>
+    <p class="big-number"><%= totalContratos %></p>
   </div>
 
   <div class="card">
     <h3>Entradas</h3>
-    <p>R$ <%= totalEntradas.toLocaleString("pt-BR") %></p>
+    <p class="big-number">R$ <%= totalEntradas.toLocaleString("pt-BR") %></p>
   </div>
 
   <div class="card">
     <h3>Saídas</h3>
-    <p>R$ <%= totalSaidas.toLocaleString("pt-BR") %></p>
+    <p class="big-number">R$ <%= totalSaidas.toLocaleString("pt-BR") %></p>
   </div>
-</div>
+</section>
+
+<section class="cards">
+  <div class="card">
+    <h3>Atalhos rápidos</h3>
+    <div class="actions">
+      <a class="button" href="/empreendimentos">Ver empreendimentos</a>
+      <a class="button secondary" href="/contratos">Abrir contratos</a>
+      <a class="button secondary" href="/financeiro">Ver financeiro</a>
+    </div>
+  </div>
+</section>
 
 <%- include("partials/footer") %>

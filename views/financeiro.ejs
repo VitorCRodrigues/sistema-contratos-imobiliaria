@@ -1,28 +1,84 @@
 <%- include("partials/header") %>
 
-<h2>Financeiro</h2>
+<section class="page-header">
+  <h2>Financeiro</h2>
+  <p>Resumo financeiro básico por empreendimento.</p>
+</section>
 
-<table>
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Categoria</th>
-      <th>Tipo</th>
-      <th>Valor</th>
-      <th>Observação</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% financeiro.forEach(item => { %>
+<section class="form-card">
+  <form action="/financeiro" method="GET">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="empreendimento">Filtrar por empreendimento</label>
+        <select name="empreendimento" id="empreendimento" onchange="this.form.submit()">
+          <option value="todos" <%= empreendimentoSelecionado === "todos" ? "selected" : "" %>>
+            Todos
+          </option>
+
+          <% empreendimentos.forEach(empreendimento => { %>
+            <option
+              value="<%= empreendimento.id %>"
+              <%= empreendimentoSelecionado === empreendimento.id ? "selected" : "" %>
+            >
+              <%= empreendimento.nome %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+  </form>
+</section>
+
+<section class="cards">
+  <div class="card">
+    <h3>Total de entradas</h3>
+    <p class="big-number">R$ <%= totalEntradas.toLocaleString("pt-BR") %></p>
+  </div>
+
+  <div class="card">
+    <h3>Total de saídas</h3>
+    <p class="big-number">R$ <%= totalSaidas.toLocaleString("pt-BR") %></p>
+  </div>
+
+  <div class="card">
+    <h3>Saldo</h3>
+    <p class="big-number">R$ <%= saldo.toLocaleString("pt-BR") %></p>
+  </div>
+</section>
+
+<section class="page-header">
+  <h3>Lançamentos</h3>
+</section>
+
+<% if (financeiro.length === 0) { %>
+  <div class="empty-state">
+    Nenhum lançamento encontrado para este filtro.
+  </div>
+<% } else { %>
+  <table>
+    <thead>
       <tr>
-        <td><%= item.data %></td>
-        <td><%= item.categoria %></td>
-        <td><%= item.tipo %></td>
-        <td>R$ <%= item.valor.toLocaleString("pt-BR") %></td>
-        <td><%= item.observacao %></td>
+        <th>Data</th>
+        <th>Empreendimento</th>
+        <th>Categoria</th>
+        <th>Tipo</th>
+        <th>Valor</th>
+        <th>Observação</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% financeiro.forEach(item => { %>
+        <tr>
+          <td><%= item.data %></td>
+          <td><%= item.empreendimentoNome %></td>
+          <td><%= item.categoria %></td>
+          <td><%= item.tipoLabel %></td>
+          <td>R$ <%= item.valor.toLocaleString("pt-BR") %></td>
+          <td><%= item.observacao %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
 
 <%- include("partials/footer") %>

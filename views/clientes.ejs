@@ -1,6 +1,9 @@
 <%- include("partials/header") %>
 
-<h2>Clientes</h2>
+<section class="page-header">
+  <h2>Clientes</h2>
+  <p>Clientes vinculados aos empreendimentos e unidades.</p>
+</section>
 
 <table>
   <thead>
@@ -10,6 +13,8 @@
       <th>Telefone</th>
       <th>Email</th>
       <th>Tipo</th>
+      <th>Empreendimento</th>
+      <th>Unidade</th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +25,8 @@
         <td><%= cliente.telefone %></td>
         <td><%= cliente.email %></td>
         <td><%= cliente.tipo %></td>
+        <td><%= cliente.empreendimentoNome %></td>
+        <td><%= cliente.unidadeNumero %></td>
       </tr>
     <% }) %>
   </tbody>

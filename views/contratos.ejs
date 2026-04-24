@@ -1,15 +1,24 @@
 <%- include("partials/header") %>
 
-<h2>Contratos</h2>
+<section class="page-header">
+  <h2>Contratos</h2>
+  <p>Modelos contratuais disponíveis e seus vínculos operacionais.</p>
+</section>
 
 <div class="cards">
   <% contratos.forEach(contrato => { %>
     <div class="card">
       <h3><%= contrato.nome %></h3>
       <p><strong>Categoria:</strong> <%= contrato.categoria %></p>
-      <p><strong>Status:</strong> <%= contrato.status %></p>
+      <p><strong>Status:</strong> <span class="badge badge-<%= contrato.status %>"><%= contrato.statusLabel %></span></p>
+      <p><strong>Cliente:</strong> <%= contrato.clienteNome %></p>
+      <p><strong>Empreendimento:</strong> <%= contrato.empreendimentoNome %></p>
+      <p><strong>Unidade:</strong> <%= contrato.unidadeNumero %></p>
       <p><%= contrato.descricao %></p>
-      <a class="button" href="<%= contrato.formLink %>" target="_blank">Abrir formulário</a>
+
+      <div class="actions">
+        <a class="button" href="<%= contrato.formLink %>" target="_blank">Abrir formulário</a>
+      </div>
     </div>
   <% }) %>
 </div>

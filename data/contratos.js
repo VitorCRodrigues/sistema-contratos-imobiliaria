@@ -5,7 +5,10 @@ const contratos = [
     categoria: "Compra e venda",
     descricao: "Contrato principal da venda da unidade.",
     formLink: "#",
-    status: "Disponível"
+    status: "disponivel",
+    empreendimentoId: "high-tower",
+    unidadeId: 2,
+    clienteId: 1
   },
   {
     id: "anexo-compra-venda",
@@ -13,7 +16,10 @@ const contratos = [
     categoria: "Anexo",
     descricao: "Declaração e termo de ciência.",
     formLink: "#",
-    status: "Disponível"
+    status: "em_preenchimento",
+    empreendimentoId: "high-tower",
+    unidadeId: 2,
+    clienteId: 1
   },
   {
     id: "termo-outorga",
@@ -21,7 +27,10 @@ const contratos = [
     categoria: "Termo",
     descricao: "Documento de anuência e outorga.",
     formLink: "#",
-    status: "Disponível"
+    status: "gerado",
+    empreendimentoId: "high-tower",
+    unidadeId: 2,
+    clienteId: 1
   },
   {
     id: "termo-emprestimo",
@@ -29,7 +38,10 @@ const contratos = [
     categoria: "Termo",
     descricao: "Documento relacionado ao financiamento da produção.",
     formLink: "#",
-    status: "Disponível"
+    status: "pendente",
+    empreendimentoId: "high-tower",
+    unidadeId: 2,
+    clienteId: 1
   },
   {
     id: "permuta",
@@ -37,7 +49,10 @@ const contratos = [
     categoria: "Permuta",
     descricao: "Permuta de terreno por unidades futuras.",
     formLink: "#",
-    status: "Disponível"
+    status: "disponivel",
+    empreendimentoId: "reserva-verde",
+    unidadeId: null,
+    clienteId: 2
   }
 ];
 

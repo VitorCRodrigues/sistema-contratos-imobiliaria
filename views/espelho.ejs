@@ -1,0 +1,63 @@
+<%- include("partials/header") %>
+
+<section class="page-header">
+  <h2>Espelho de vendas</h2>
+  <p>Visualização das unidades por empreendimento.</p>
+</section>
+
+<section class="form-card">
+  <form action="/espelho" method="GET">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="empreendimento">Empreendimento</label>
+        <select name="empreendimento" id="empreendimento" onchange="this.form.submit()">
+          <% empreendimentos.forEach(empreendimento => { %>
+            <option
+              value="<%= empreendimento.id %>"
+              <%= empreendimentoSelecionado && empreendimentoSelecionado.id === empreendimento.id ? "selected" : "" %>
+            >
+              <%= empreendimento.nome %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+  </form>
+</section>
+
+<% if (!empreendimentoSelecionado) { %>
+  <div class="empty-state">
+    Nenhum empreendimento disponível.
+  </div>
+<% } else { %>
+  <section class="page-header">
+    <h3><%= empreendimentoSelecionado.nome %></h3>
+    <p><%= empreendimentoSelecionado.endereco %></p>
+  </section>
+
+  <% if (unidades.length === 0) { %>
+    <div class="empty-state">
+      Nenhuma unidade cadastrada para este empreendimento.
+    </div>
+  <% } else { %>
+    <section class="mirror-grid">
+      <% unidades.forEach(unidade => { %>
+        <div class="unit-card status-<%= unidade.status %>">
+          <div class="unit-top">
+            <span class="unit-number">Unidade <%= unidade.numero %></span>
+            <span class="unit-status"><%= unidade.statusLabel %></span>
+          </div>
+
+          <p><strong>Pavimento:</strong> <%= unidade.pavimento %></p>
+          <p><strong>Tipologia:</strong> <%= unidade.tipologia %></p>
+          <p><strong>Metragem:</strong> <%= unidade.metragem %></p>
+          <% if (unidade.clienteNome) { %>
+            <p><strong>Cliente:</strong> <%= unidade.clienteNome %></p>
+          <% } %>
+        </div>
+      <% }) %>
+    </section>
+  <% } %>
+<% } %>
+
+<%- include("partials/footer") %>

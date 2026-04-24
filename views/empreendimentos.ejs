@@ -1,17 +1,100 @@
 <%- include("partials/header") %>
 
-<h2>Empreendimentos</h2>
+<section class="page-header">
+  <h2>Empreendimentos</h2>
+  <p>Cadastre, visualize e remova empreendimentos do sistema.</p>
+</section>
 
-<div class="cards">
-  <% empreendimentos.forEach(empreendimento => { %>
-    <div class="card">
-      <h3><%= empreendimento.nome %></h3>
-      <p><strong>Status:</strong> <%= empreendimento.status %></p>
-      <p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
-      <p><%= empreendimento.descricao %></p>
-      <a class="button" href="/empreendimentos/<%= empreendimento.id %>">Ver detalhes</a>
+<section class="form-card">
+  <h3>Novo empreendimento</h3>
+
+  <form action="/empreendimentos" method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" required />
+      </div>
+
+      <div class="form-group">
+        <label for="endereco">Endereço</label>
+        <input type="text" id="endereco" name="endereco" required />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+          <option value="ativo">Ativo</option>
+          <option value="em_planejamento">Em planejamento</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="memorialLink">Link do memorial</label>
+        <input type="text" id="memorialLink" name="memorialLink" />
+      </div>
+
+      <div class="form-group">
+        <label for="plantaLink">Link das plantas</label>
+        <input type="text" id="plantaLink" name="plantaLink" />
+      </div>
+
+      <div class="form-group">
+        <label for="tabelaVendaLink">Link da tabela de vendas</label>
+        <input type="text" id="tabelaVendaLink" name="tabelaVendaLink" />
+      </div>
     </div>
-  <% }) %>
-</div>
+
+    <div class="actions">
+      <button type="submit" class="button">Adicionar empreendimento</button>
+    </div>
+  </form>
+</section>
+
+<section class="page-header">
+  <h3>Lista de empreendimentos</h3>
+</section>
+
+<% if (empreendimentos.length === 0) { %>
+  <div class="empty-state">
+    Nenhum empreendimento cadastrado ainda.
+  </div>
+<% } else { %>
+  <div class="cards">
+    <% empreendimentos.forEach(empreendimento => { %>
+      <div class="card">
+        <h3><%= empreendimento.nome %></h3>
+        <p><strong>Status:</strong> <%= empreendimento.statusLabel %></p>
+        <p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
+        <p><%= empreendimento.descricao %></p>
+
+        <div class="mini-stats">
+          <span>Total: <strong><%= empreendimento.resumo.total %></strong></span>
+          <span>Livres: <strong><%= empreendimento.resumo.livres %></strong></span>
+          <span>Negociação: <strong><%= empreendimento.resumo.negociacao %></strong></span>
+          <span>Vendidas: <strong><%= empreendimento.resumo.vendidas %></strong></span>
+        </div>
+
+        <div class="actions">
+          <a class="button" href="/empreendimentos/<%= empreendimento.id %>">Ver detalhes</a>
+          <a class="button secondary" href="/espelho?empreendimento=<%= empreendimento.id %>">Ver espelho</a>
+
+          <form
+            action="/empreendimentos/<%= empreendimento.id %>/delete"
+            method="POST"
+            class="inline-form"
+          >
+            <button type="submit" class="button danger">Remover</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
 
 <%- include("partials/footer") %>

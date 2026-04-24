@@ -6,7 +6,9 @@ const clientes = [
     telefone: "(27) 99999-9999",
     email: "joao@email.com",
     tipo: "Comprador",
-    observacoes: ""
+    observacoes: "",
+    empreendimentoId: "high-tower",
+    unidadeId: 2
   },
   {
     id: 2,
@@ -15,7 +17,9 @@ const clientes = [
     telefone: "(27) 98888-8888",
     email: "maria@email.com",
     tipo: "Investidor",
-    observacoes: ""
+    observacoes: "",
+    empreendimentoId: "reserva-verde",
+    unidadeId: null
   }
 ];
 

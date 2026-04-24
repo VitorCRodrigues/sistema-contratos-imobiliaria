@@ -1,39 +1,72 @@
 <%- include("partials/header") %>
 
-<h2><%= empreendimento.nome %></h2>
-<p><strong>Status:</strong> <%= empreendimento.status %></p>
-<p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
-<p><%= empreendimento.descricao %></p>
+<section class="page-header">
+  <h2><%= empreendimento.nome %></h2>
+  <p><strong>Status:</strong> <%= empreendimento.statusLabel %></p>
+  <p><strong>Endereço:</strong> <%= empreendimento.endereco %></p>
+  <p><%= empreendimento.descricao %></p>
+</section>
 
-<h3>Documentos</h3>
-<ul>
-  <li><a href="<%= empreendimento.memorialLink %>">Memorial descritivo</a></li>
-  <li><a href="<%= empreendimento.plantaLink %>">Plantas</a></li>
-  <li><a href="<%= empreendimento.tabelaVendaLink %>">Tabela de venda</a></li>
-</ul>
+<section class="cards">
+  <div class="card">
+    <h3>Total de unidades</h3>
+    <p class="big-number"><%= resumo.total %></p>
+  </div>
+  <div class="card">
+    <h3>Livres</h3>
+    <p class="big-number"><%= resumo.livres %></p>
+  </div>
+  <div class="card">
+    <h3>Negociação</h3>
+    <p class="big-number"><%= resumo.negociacao %></p>
+  </div>
+  <div class="card">
+    <h3>Vendidas</h3>
+    <p class="big-number"><%= resumo.vendidas %></p>
+  </div>
+</section>
 
-<h3>Unidades</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Unidade</th>
-      <th>Pavimento</th>
-      <th>Tipologia</th>
-      <th>Metragem</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% unidades.forEach(unidade => { %>
+<section class="form-card">
+  <h3>Documentos vinculados</h3>
+  <div class="actions">
+    <a class="button secondary" href="<%= empreendimento.memorialLink %>" target="_blank">Memorial</a>
+    <a class="button secondary" href="<%= empreendimento.plantaLink %>" target="_blank">Plantas</a>
+    <a class="button secondary" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Tabela de vendas</a>
+    <a class="button" href="/espelho?empreendimento=<%= empreendimento.id %>">Abrir espelho</a>
+  </div>
+</section>
+
+<section class="page-header">
+  <h3>Unidades do empreendimento</h3>
+</section>
+
+<% if (unidades.length === 0) { %>
+  <div class="empty-state">
+    Nenhuma unidade cadastrada para este empreendimento ainda.
+  </div>
+<% } else { %>
+  <table>
+    <thead>
       <tr>
-        <td><%= unidade.numero %></td>
-        <td><%= unidade.pavimento %></td>
-        <td><%= unidade.tipologia %></td>
-        <td><%= unidade.metragem %></td>
-        <td><%= unidade.status %></td>
+        <th>Unidade</th>
+        <th>Pavimento</th>
+        <th>Tipologia</th>
+        <th>Metragem</th>
+        <th>Status</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% unidades.forEach(unidade => { %>
+        <tr>
+          <td><%= unidade.numero %></td>
+          <td><%= unidade.pavimento %></td>
+          <td><%= unidade.tipologia %></td>
+          <td><%= unidade.metragem %></td>
+          <td><%= unidade.statusLabel %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
 
 <%- include("partials/footer") %>
