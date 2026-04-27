@@ -1,12 +1,33 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
+const path = require("path");
 
+const documentos = require("../data/documentos");
 const empreendimentosData = require("../data/empreendimentos");
 const clientes = require("../data/clientes");
 const contratos = require("../data/contratos");
 const financeiro = require("../data/financeiro");
 const unidades = require("../data/unidades");
 const { getResumoUnidades } = require("../data/helpers");
+
+function criarEstruturaDocumentos(empreendimentoId) {
+  const basePath = path.join(__dirname, "..", "storage", "documentos", empreendimentoId);
+
+  const pastas = [
+    basePath,
+    path.join(basePath, "contratos"),
+    path.join(basePath, "anexos"),
+    path.join(basePath, "termos")
+  ];
+
+  pastas.forEach((pasta) => {
+    if (!fs.existsSync(pasta)) {
+      fs.mkdirSync(pasta, { recursive: true });
+    }
+  });
+}
+
 
 const empreendimentoStatusMap = {
   ativo: "Ativo",
@@ -26,6 +47,33 @@ const financeiroTipoMap = {
   entrada: "Entrada",
   saida: "Saída"
 };
+
+router.get("/documentos", (req, res) => {
+  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+
+  const docsComRelacionamento = documentos.map((doc) => {
+    const empreendimento = empreendimentos.find(
+      e => e.id === doc.empreendimentoId
+    );
+
+    const unidade = unidades.find(
+      u => u.id === doc.unidadeId
+    );
+
+    const cliente = clientes.find(
+      c => c.id === doc.clienteId
+    );
+
+    return {
+      ...doc,
+      empreendimentoNome: empreendimento?.nome || "-",
+      unidadeNumero: unidade?.numero || "-",
+      clienteNome: cliente?.nome || "-"
+    };
+  });
+
+  res.render("documentos", { documentos: docsComRelacionamento });
+});
 
 router.get("/", (req, res) => {
   const empreendimentos = empreendimentosData.getAllEmpreendimentos();
@@ -88,6 +136,8 @@ router.post("/empreendimentos", (req, res) => {
     plantaLink: plantaLink || "#",
     tabelaVendaLink: tabelaVendaLink || "#"
   });
+
+  criarEstruturaDocumentos(id);
 
   res.redirect("/empreendimentos");
 });

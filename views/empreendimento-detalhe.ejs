@@ -40,6 +40,27 @@
   <h3>Unidades do empreendimento</h3>
 </section>
 
+<section class="page-header">
+  <h3>Arquivos do empreendimento</h3>
+</section>
+
+<div class="cards">
+  <div class="card">
+    <h3>Memorial descritivo</h3>
+    <a class="button" href="<%= empreendimento.memorialLink %>" target="_blank">Abrir</a>
+  </div>
+
+  <div class="card">
+    <h3>Planta</h3>
+    <a class="button" href="<%= empreendimento.plantaLink %>" target="_blank">Abrir</a>
+  </div>
+
+  <div class="card">
+    <h3>Tabela de vendas</h3>
+    <a class="button" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Abrir</a>
+  </div>
+</div>
+
 <% if (unidades.length === 0) { %>
   <div class="empty-state">
     Nenhuma unidade cadastrada para este empreendimento ainda.

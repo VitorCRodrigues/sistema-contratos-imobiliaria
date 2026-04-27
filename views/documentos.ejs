@@ -1,0 +1,37 @@
+<%- include("partials/header") %>
+
+<section class="page-header">
+  <h2>Documentos</h2>
+  <p>Arquivos gerados e vinculados aos empreendimentos.</p>
+</section>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Tipo</th>
+      <th>Empreendimento</th>
+      <th>Unidade</th>
+      <th>Cliente</th>
+      <th>Data</th>
+      <th>Ação</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% documentos.forEach(doc => { %>
+      <tr>
+        <td><%= doc.nome %></td>
+        <td><%= doc.tipo %></td>
+        <td><%= doc.empreendimentoNome %></td>
+        <td><%= doc.unidadeNumero %></td>
+        <td><%= doc.clienteNome %></td>
+        <td><%= doc.data %></td>
+        <td>
+          <a href="<%= doc.caminho %>" target="_blank">Abrir</a>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include("partials/footer") %>
