@@ -1,26 +1,192 @@
 <%- include("partials/header") %>
 
+<script type="application/json" id="unidades-data"><%- JSON.stringify(unidades) %></script>
+
 <section class="page-header">
   <h2>Contratos</h2>
-  <p>Modelos contratuais disponíveis e seus vínculos operacionais.</p>
+  <p>Geração e acompanhamento de operações contratuais.</p>
 </section>
 
-<div class="cards">
-  <% contratos.forEach(contrato => { %>
-    <div class="card">
-      <h3><%= contrato.nome %></h3>
-      <p><strong>Categoria:</strong> <%= contrato.categoria %></p>
-      <p><strong>Status:</strong> <span class="badge badge-<%= contrato.status %>"><%= contrato.statusLabel %></span></p>
-      <p><strong>Cliente:</strong> <%= contrato.clienteNome %></p>
-      <p><strong>Empreendimento:</strong> <%= contrato.empreendimentoNome %></p>
-      <p><strong>Unidade:</strong> <%= contrato.unidadeNumero %></p>
-      <p><%= contrato.descricao %></p>
-
-      <div class="actions">
-        <a class="button" href="<%= contrato.formLink %>" target="_blank">Abrir formulário</a>
-      </div>
+<!-- BLOCO A: Iniciar nova operação -->
+<div class="form-card" style="margin-bottom: 32px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+    <div>
+      <h3 style="margin: 0 0 4px;">Iniciar nova operação</h3>
+      <p style="margin: 0; color: #6b7280; font-size: 14px;">Selecione cliente, unidade e categoria para gerar os contratos automaticamente.</p>
     </div>
-  <% }) %>
+    <button class="button" id="btn-toggle">Iniciar processo de venda</button>
+  </div>
+
+  <div id="form-nova-operacao" style="display: none; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+    <form action="/contratos/iniciar" method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="clienteId">Cliente</label>
+          <select name="clienteId" id="clienteId" required>
+            <option value="">Selecione um cliente</option>
+            <% clientes.forEach(c => { %>
+              <option value="<%= c.id %>"><%= c.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="select-empreendimento">Empreendimento</label>
+          <select name="empreendimentoId" id="select-empreendimento" required>
+            <option value="">Selecione um empreendimento</option>
+            <% empreendimentos.forEach(e => { %>
+              <option value="<%= e.id %>"><%= e.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="select-unidade">Unidade</label>
+          <select name="unidadeId" id="select-unidade" required>
+            <option value="">Selecione primeiro o empreendimento</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="categoriaOperacao">Categoria da operação</label>
+          <select name="categoriaOperacao" id="categoriaOperacao" required>
+            <option value="compra_venda">Compra e Venda (3 documentos)</option>
+            <option value="permuta">Permuta (2 documentos)</option>
+            <option value="reserva">Reserva (1 documento)</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="observacoes">Observações</label>
+          <textarea name="observacoes" id="observacoes" placeholder="Observações opcionais sobre a operação..."></textarea>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top: 16px;">
+        <button type="submit" class="button">Criar contratos</button>
+        <button type="button" class="button secondary" id="btn-cancelar">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- BLOCO B: Operações em andamento -->
+<h3 style="margin: 0 0 12px;">Operações em andamento</h3>
+
+<% if (operacoes.length === 0) { %>
+  <div class="empty-state">Nenhuma operação registrada. Inicie um processo de venda acima.</div>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Unidade</th>
+        <th>Empreendimento</th>
+        <th>Início</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% operacoes.forEach((op, idx) => { %>
+        <tr>
+          <td><%= op.clienteNome %></td>
+          <td><%= op.unidadeNumero %></td>
+          <td><%= op.empreendimentoNome %></td>
+          <td><%= op.dataInicio %></td>
+          <td>
+            <span class="op-status <%= op.statusGeral === 'Concluído' ? 'op-status-concluido' : 'op-status-andamento' %>">
+              <%= op.statusGeral %>
+            </span>
+          </td>
+          <td>
+            <button
+              class="button secondary"
+              style="font-size: 12px; padding: 6px 10px;"
+              data-toggle-detalhes="<%= idx %>"
+            >Ver documentos</button>
+          </td>
+        </tr>
+        <tr id="detalhes-<%= idx %>" style="display: none;">
+          <td colspan="6" style="background: #f8fafc; padding: 0;">
+            <table style="box-shadow: none; border-radius: 0; margin: 0;">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Categoria</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% op.contratos.forEach(c => { %>
+                  <tr>
+                    <td><%= c.nome %></td>
+                    <td><%= c.categoria %></td>
+                    <td><%= c.statusLabel %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<script>
+  const todasUnidades = JSON.parse(document.getElementById("unidades-data").textContent);
+
+  document.getElementById("btn-toggle").addEventListener("click", function () {
+    const form = document.getElementById("form-nova-operacao");
+    const aberto = form.style.display !== "none";
+    form.style.display = aberto ? "none" : "block";
+    this.textContent = aberto ? "Iniciar processo de venda" : "Fechar";
+  });
+
+  document.getElementById("btn-cancelar").addEventListener("click", function () {
+    const form = document.getElementById("form-nova-operacao");
+    form.style.display = "none";
+    document.getElementById("btn-toggle").textContent = "Iniciar processo de venda";
+  });
+
+  document.getElementById("select-empreendimento").addEventListener("change", function () {
+    const empreendimentoId = this.value;
+    const selectUnidade = document.getElementById("select-unidade");
+
+    selectUnidade.innerHTML = "<option value=\"\">Selecione uma unidade</option>";
+
+    if (!empreendimentoId) return;
+
+    const filtradas = todasUnidades.filter(function (u) {
+      return u.empreendimentoId === empreendimentoId && u.status === "livre";
+    });
+
+    if (filtradas.length === 0) {
+      const opt = document.createElement("option");
+      opt.disabled = true;
+      opt.textContent = "Nenhuma unidade livre neste empreendimento";
+      selectUnidade.appendChild(opt);
+      return;
+    }
+
+    filtradas.forEach(function (u) {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.numero + " — " + u.tipologia + " (" + u.metragem + ")";
+      selectUnidade.appendChild(opt);
+    });
+  });
+
+  document.querySelectorAll("[data-toggle-detalhes]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const idx = this.dataset.toggleDetalhes;
+      const row = document.getElementById("detalhes-" + idx);
+      const aberto = row.style.display !== "none";
+      row.style.display = aberto ? "none" : "table-row";
+      this.textContent = aberto ? "Ver documentos" : "Fechar";
+    });
+  });
+</script>
 
 <%- include("partials/footer") %>

@@ -268,3 +268,20 @@ textarea {
 .card:nth-child(3) .big-number {
   color: #1d4ed8;
 }
+
+.op-status {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.op-status-andamento {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.op-status-concluido {
+  background: #dcfce7;
+  color: #15803d;
+}

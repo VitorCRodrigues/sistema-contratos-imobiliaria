@@ -1,24 +1,18 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const fs = require("fs");
-const path = require("path");
-
-const documentos = require("../data/documentos");
-const empreendimentosData = require("../data/empreendimentos");
-const clientes = require("../data/clientes");
-const contratos = require("../data/contratos");
-const financeiro = require("../data/financeiro");
-const unidades = require("../data/unidades");
-const { getResumoUnidades } = require("../data/helpers");
+const fs = require('fs');
+const path = require('path');
+const db = require('../database');
+const { getResumoUnidades } = require('../data/helpers');
 
 function criarEstruturaDocumentos(empreendimentoId) {
-  const basePath = path.join(__dirname, "..", "storage", "documentos", empreendimentoId);
+  const basePath = path.join(__dirname, '..', 'storage', 'documentos', empreendimentoId);
 
   const pastas = [
     basePath,
-    path.join(basePath, "contratos"),
-    path.join(basePath, "anexos"),
-    path.join(basePath, "termos")
+    path.join(basePath, 'contratos'),
+    path.join(basePath, 'anexos'),
+    path.join(basePath, 'termos')
   ];
 
   pastas.forEach((pasta) => {
@@ -28,69 +22,55 @@ function criarEstruturaDocumentos(empreendimentoId) {
   });
 }
 
-
 const empreendimentoStatusMap = {
-  ativo: "Ativo",
-  em_planejamento: "Em planejamento",
-  concluido: "Concluído"
+  ativo: 'Ativo',
+  em_planejamento: 'Em planejamento',
+  concluido: 'Concluído'
 };
 
 const unidadeStatusMap = {
-  livre: "Livre",
-  negociacao: "Negociação",
-  vendido: "Vendido",
-  permutado: "Permutado",
-  cancelado: "Cancelado"
+  livre: 'Livre',
+  negociacao: 'Negociação',
+  vendido: 'Vendido',
+  permutado: 'Permutado',
+  cancelado: 'Cancelado'
 };
 
 const financeiroTipoMap = {
-  entrada: "Entrada",
-  saida: "Saída"
+  entrada: 'Entrada',
+  saida: 'Saída'
 };
 
-router.get("/documentos", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+router.get('/documentos', (req, res) => {
+  const documentos = db.prepare(`
+    SELECT d.*,
+      COALESCE(e.nome, '-') as empreendimentoNome,
+      COALESCE(u.numero, '-') as unidadeNumero,
+      COALESCE(c.nome, '-') as clienteNome
+    FROM documentos d
+    LEFT JOIN empreendimentos e ON d.empreendimentoId = e.id
+    LEFT JOIN unidades u ON d.unidadeId = u.id
+    LEFT JOIN clientes c ON d.clienteId = c.id
+  `).all();
 
-  const docsComRelacionamento = documentos.map((doc) => {
-    const empreendimento = empreendimentos.find(
-      e => e.id === doc.empreendimentoId
-    );
-
-    const unidade = unidades.find(
-      u => u.id === doc.unidadeId
-    );
-
-    const cliente = clientes.find(
-      c => c.id === doc.clienteId
-    );
-
-    return {
-      ...doc,
-      empreendimentoNome: empreendimento?.nome || "-",
-      unidadeNumero: unidade?.numero || "-",
-      clienteNome: cliente?.nome || "-"
-    };
-  });
-
-  res.render("documentos", { documentos: docsComRelacionamento });
+  res.render('documentos', { documentos });
 });
 
-router.get("/", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
-
-  const totalEmpreendimentos = empreendimentos.length;
-  const totalClientes = clientes.length;
-  const totalContratos = contratos.length;
+router.get('/', (req, res) => {
+  const totalEmpreendimentos = db.prepare('SELECT COUNT(*) as n FROM empreendimentos').get().n;
+  const totalClientes = db.prepare('SELECT COUNT(*) as n FROM clientes').get().n;
+  const totalContratos = db.prepare('SELECT COUNT(*) as n FROM contratos').get().n;
+  const financeiro = db.prepare('SELECT tipo, valor FROM financeiro').all();
 
   const totalEntradas = financeiro
-    .filter(item => item.tipo === "Entrada")
-    .reduce((acc, item) => acc + item.valor, 0);
+    .filter(f => f.tipo === 'entrada')
+    .reduce((acc, f) => acc + f.valor, 0);
 
   const totalSaidas = financeiro
-    .filter(item => item.tipo === "Saída")
-    .reduce((acc, item) => acc + item.valor, 0);
+    .filter(f => f.tipo === 'saida')
+    .reduce((acc, f) => acc + f.valor, 0);
 
-  res.render("index", {
+  res.render('index', {
     totalEmpreendimentos,
     totalClientes,
     totalContratos,
@@ -99,13 +79,13 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/empreendimentos", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+router.get('/empreendimentos', (req, res) => {
+  const empreendimentos = db.prepare('SELECT * FROM empreendimentos').all();
 
   const empreendimentosComResumo = empreendimentos.map((empreendimento) => {
-    const unidadesDoEmpreendimento = unidades.filter(
-      unidade => unidade.empreendimentoId === empreendimento.id
-    );
+    const unidadesDoEmpreendimento = db.prepare(
+      'SELECT * FROM unidades WHERE empreendimentoId = ?'
+    ).all(empreendimento.id);
 
     return {
       ...empreendimento,
@@ -114,56 +94,49 @@ router.get("/empreendimentos", (req, res) => {
     };
   });
 
-  res.render("empreendimentos", { empreendimentos: empreendimentosComResumo });
+  res.render('empreendimentos', { empreendimentos: empreendimentosComResumo });
 });
 
-router.post("/empreendimentos", (req, res) => {
+router.post('/empreendimentos', (req, res) => {
   const { nome, endereco, status, descricao, memorialLink, plantaLink, tabelaVendaLink } = req.body;
 
   const id = nome
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '-');
 
-  empreendimentosData.addEmpreendimento({
-    id,
-    nome,
-    endereco,
-    status,
-    descricao,
-    memorialLink: memorialLink || "#",
-    plantaLink: plantaLink || "#",
-    tabelaVendaLink: tabelaVendaLink || "#"
-  });
+  db.prepare(
+    'INSERT INTO empreendimentos (id, nome, endereco, status, descricao, memorialLink, plantaLink, tabelaVendaLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run([id, nome, endereco, status, descricao, memorialLink || '#', plantaLink || '#', tabelaVendaLink || '#']);
 
   criarEstruturaDocumentos(id);
 
-  res.redirect("/empreendimentos");
+  res.redirect('/empreendimentos');
 });
 
-router.post("/empreendimentos/:id/delete", (req, res) => {
-  empreendimentosData.removeEmpreendimento(req.params.id);
-  res.redirect("/empreendimentos");
+router.post('/empreendimentos/:id/delete', (req, res) => {
+  db.prepare('DELETE FROM empreendimentos WHERE id = ?').run(req.params.id);
+  res.redirect('/empreendimentos');
 });
 
-router.get("/empreendimentos/:id", (req, res) => {
-  const empreendimento = empreendimentosData.getEmpreendimentoById(req.params.id);
+router.get('/empreendimentos/:id', (req, res) => {
+  const empreendimento = db.prepare('SELECT * FROM empreendimentos WHERE id = ?').get(req.params.id);
 
   if (!empreendimento) {
-    return res.status(404).send("Empreendimento não encontrado");
+    return res.status(404).send('Empreendimento não encontrado');
   }
 
-  const unidadesDoEmpreendimento = unidades
-    .filter(unidade => unidade.empreendimentoId === empreendimento.id)
-    .map((unidade) => ({
-      ...unidade,
-      statusLabel: unidadeStatusMap[unidade.status] || unidade.status
-    }));
+  const unidadesDoEmpreendimento = db.prepare(
+    'SELECT * FROM unidades WHERE empreendimentoId = ?'
+  ).all(empreendimento.id).map((u) => ({
+    ...u,
+    statusLabel: unidadeStatusMap[u.status] || u.status
+  }));
 
   const resumo = getResumoUnidades(unidadesDoEmpreendimento);
 
-  res.render("empreendimento-detalhe", {
+  res.render('empreendimento-detalhe', {
     empreendimento: {
       ...empreendimento,
       statusLabel: empreendimentoStatusMap[empreendimento.status] || empreendimento.status
@@ -173,125 +146,178 @@ router.get("/empreendimentos/:id", (req, res) => {
   });
 });
 
-router.get("/espelho", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+router.get('/espelho', (req, res) => {
+  const empreendimentos = db.prepare('SELECT * FROM empreendimentos').all();
   const empreendimentoId = req.query.empreendimento || empreendimentos[0]?.id;
 
-  const empreendimentoSelecionado = empreendimentos.find(
-    e => e.id === empreendimentoId
-  );
+  const empreendimentoSelecionado = empreendimentos.find(e => e.id === empreendimentoId);
 
-  const unidadesDoEmpreendimento = unidades
-    .filter(unidade => unidade.empreendimentoId === empreendimentoId)
-    .map((unidade) => {
-      const cliente = clientes.find(c => c.id === unidade.clienteId);
+  const unidades = db.prepare(`
+    SELECT u.*, c.nome as clienteNome
+    FROM unidades u
+    LEFT JOIN clientes c ON u.clienteId = c.id
+    WHERE u.empreendimentoId = ?
+  `).all(empreendimentoId).map((u) => ({
+    ...u,
+    statusLabel: unidadeStatusMap[u.status] || u.status
+  }));
 
-      return {
-        ...unidade,
-        statusLabel: unidadeStatusMap[unidade.status] || unidade.status,
-        clienteNome: cliente ? cliente.nome : null
-      };
-    });
-
-  res.render("espelho", {
+  res.render('espelho', {
     empreendimentos,
     empreendimentoSelecionado,
-    unidades: unidadesDoEmpreendimento
+    unidades
   });
 });
 
-router.get("/clientes", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+router.get('/clientes', (req, res) => {
+  const clientes = db.prepare(`
+    SELECT cl.*,
+      COALESCE(e.nome, 'Não vinculado') as empreendimentoNome,
+      COALESCE(u.numero, 'Não vinculada') as unidadeNumero
+    FROM clientes cl
+    LEFT JOIN empreendimentos e ON cl.empreendimentoId = e.id
+    LEFT JOIN unidades u ON cl.unidadeId = u.id
+  `).all();
 
-  const clientesComRelacionamento = clientes.map((cliente) => {
-    const empreendimento = empreendimentos.find(
-      e => e.id === cliente.empreendimentoId
-    );
-
-    const unidade = unidades.find(
-      u => u.id === cliente.unidadeId
-    );
-
-    return {
-      ...cliente,
-      empreendimentoNome: empreendimento ? empreendimento.nome : "Não vinculado",
-      unidadeNumero: unidade ? unidade.numero : "Não vinculada"
-    };
-  });
-
-  res.render("clientes", { clientes: clientesComRelacionamento });
+  res.render('clientes', { clientes });
 });
 
-router.get("/contratos", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
+router.get('/contratos', (req, res) => {
+  const empreendimentos = db.prepare('SELECT * FROM empreendimentos').all();
+  const clientes = db.prepare('SELECT * FROM clientes').all();
+  const unidades = db.prepare('SELECT * FROM unidades').all();
 
   const statusMap = {
-    disponivel: "Disponível",
-    em_preenchimento: "Em preenchimento",
-    gerado: "Gerado",
-    pendente: "Pendente"
+    disponivel: 'Disponível',
+    em_preenchimento: 'Em preenchimento',
+    gerado: 'Gerado',
+    pendente: 'Pendente'
   };
 
-  const contratosComRelacionamento = contratos.map((contrato) => {
-    const empreendimento = empreendimentos.find(
-      e => e.id === contrato.empreendimentoId
-    );
+  const contratosEnriquecidos = db.prepare(`
+    SELECT ct.*,
+      cl.nome as clienteNome,
+      e.nome as empreendimentoNome,
+      u.numero as unidadeNumero
+    FROM contratos ct
+    LEFT JOIN clientes cl ON ct.clienteId = cl.id
+    LEFT JOIN empreendimentos e ON ct.empreendimentoId = e.id
+    LEFT JOIN unidades u ON ct.unidadeId = u.id
+  `).all().map((c) => ({
+    ...c,
+    statusLabel: statusMap[c.status] || c.status
+  }));
 
-    const unidade = unidades.find(
-      u => u.id === contrato.unidadeId
-    );
-
-    const cliente = clientes.find(
-      c => c.id === contrato.clienteId
-    );
-
-    return {
-      ...contrato,
-      statusLabel: statusMap[contrato.status] || contrato.status,
-      empreendimentoNome: empreendimento ? empreendimento.nome : "Não vinculado",
-      unidadeNumero: unidade ? unidade.numero : "Não vinculada",
-      clienteNome: cliente ? cliente.nome : "Não vinculado"
-    };
+  const operacoesMap = {};
+  contratosEnriquecidos.forEach((c) => {
+    const key = `${c.clienteId}-${c.unidadeId}`;
+    if (!operacoesMap[key]) {
+      operacoesMap[key] = {
+        operacaoId: key,
+        clienteNome: c.clienteNome,
+        unidadeNumero: c.unidadeNumero,
+        empreendimentoNome: c.empreendimentoNome,
+        dataInicio: c.created_at ? c.created_at.split('T')[0] : '-',
+        categoriaOperacao: c.categoria,
+        contratos: []
+      };
+    }
+    operacoesMap[key].contratos.push(c);
   });
 
-  res.render("contratos", { contratos: contratosComRelacionamento });
+  const operacoes = Object.values(operacoesMap).map((op) => ({
+    ...op,
+    statusGeral: op.contratos.every((c) => c.status === 'gerado') ? 'Concluído' : 'Em andamento'
+  }));
+
+  res.render('contratos', { operacoes, clientes, empreendimentos, unidades });
 });
 
-router.get("/financeiro", (req, res) => {
-  const empreendimentos = empreendimentosData.getAllEmpreendimentos();
-  const empreendimentoId = req.query.empreendimento || "todos";
+router.post('/contratos/iniciar', (req, res) => {
+  const { clienteId, empreendimentoId, unidadeId, categoriaOperacao, observacoes } = req.body;
 
-  let financeiroFiltrado = financeiro;
+  const operacaoId = `op-${Date.now()}`;
 
-  if (empreendimentoId !== "todos") {
-    financeiroFiltrado = financeiro.filter(
-      item => item.empreendimentoId === empreendimentoId
-    );
-  }
+  const templatesMap = {
+    compra_venda: [
+      { nome: 'Contrato de Promessa de Compra e Venda', categoria: 'Compra e Venda' },
+      { nome: 'Anexo ao Contrato de Promessa de Compra e Venda', categoria: 'Anexo' },
+      { nome: 'Termo de Anuência com Outorga de Poderes', categoria: 'Termo' }
+    ],
+    permuta: [
+      { nome: 'Contrato de Permuta', categoria: 'Permuta' },
+      { nome: 'Termo de Ciência e Anuência', categoria: 'Termo' }
+    ],
+    reserva: [
+      { nome: 'Termo de Reserva', categoria: 'Reserva' }
+    ]
+  };
 
-  const financeiroComRelacionamento = financeiroFiltrado.map((item) => {
-    const empreendimento = empreendimentos.find(
-      e => e.id === item.empreendimentoId
-    );
+  const templates = templatesMap[categoriaOperacao] || [];
+  const ins = db.prepare(
+    'INSERT INTO contratos (id, nome, categoria, status, empreendimentoId, unidadeId, clienteId) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  );
 
-    return {
-      ...item,
-      tipoLabel: financeiroTipoMap[item.tipo] || item.tipo,
-      empreendimentoNome: empreendimento ? empreendimento.nome : "Não vinculado"
-    };
+  templates.forEach((template, i) => {
+    ins.run([
+      `${operacaoId}-${i}`,
+      template.nome,
+      template.categoria,
+      'pendente',
+      empreendimentoId,
+      unidadeId ? parseInt(unidadeId) : null,
+      parseInt(clienteId)
+    ]);
   });
 
-  const totalEntradas = financeiroFiltrado
-    .filter(item => item.tipo === "entrada")
+  if (unidadeId) {
+    db.prepare('UPDATE unidades SET status = ?, clienteId = ? WHERE id = ?').run([
+      'negociacao',
+      parseInt(clienteId),
+      parseInt(unidadeId)
+    ]);
+  }
+
+  res.redirect('/contratos');
+});
+
+router.get('/financeiro', (req, res) => {
+  const empreendimentos = db.prepare('SELECT * FROM empreendimentos').all();
+  const empreendimentoId = req.query.empreendimento || 'todos';
+
+  let financeiroComRelacionamento;
+
+  if (empreendimentoId !== 'todos') {
+    financeiroComRelacionamento = db.prepare(`
+      SELECT f.*, COALESCE(e.nome, 'Não vinculado') as empreendimentoNome
+      FROM financeiro f
+      LEFT JOIN empreendimentos e ON f.empreendimentoId = e.id
+      WHERE f.empreendimentoId = ?
+    `).all(empreendimentoId);
+  } else {
+    financeiroComRelacionamento = db.prepare(`
+      SELECT f.*, COALESCE(e.nome, 'Não vinculado') as empreendimentoNome
+      FROM financeiro f
+      LEFT JOIN empreendimentos e ON f.empreendimentoId = e.id
+    `).all();
+  }
+
+  financeiroComRelacionamento = financeiroComRelacionamento.map((item) => ({
+    ...item,
+    tipoLabel: financeiroTipoMap[item.tipo] || item.tipo
+  }));
+
+  const totalEntradas = financeiroComRelacionamento
+    .filter((item) => item.tipo === 'entrada')
     .reduce((acc, item) => acc + item.valor, 0);
 
-  const totalSaidas = financeiroFiltrado
-    .filter(item => item.tipo === "saida")
+  const totalSaidas = financeiroComRelacionamento
+    .filter((item) => item.tipo === 'saida')
     .reduce((acc, item) => acc + item.valor, 0);
 
   const saldo = totalEntradas - totalSaidas;
 
-  res.render("financeiro", {
+  res.render('financeiro', {
     financeiro: financeiroComRelacionamento,
     empreendimentos,
     empreendimentoSelecionado: empreendimentoId,
