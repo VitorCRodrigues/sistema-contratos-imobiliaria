@@ -135,6 +135,11 @@ if (db.prepare('SELECT COUNT(*) as n FROM contratos').get().n === 0) {
   ins.run(['permuta', 'Contrato de Permuta', 'Permuta', 'Permuta de terreno por unidades futuras.', '#', 'disponivel', 'reserva-verde', null, 2]);
 }
 
+// Corrige contratos com formLink placeholder
+db.prepare(
+  "UPDATE contratos SET formLink = 'https://docs.google.com/forms/d/10F6hk-zWLtZkzk2Xhnn-X1Tu5q2UVh9WXmlBOfu_5EU/viewform' WHERE formLink = '#' OR formLink IS NULL"
+).run();
+
 // Seed financeiro
 if (db.prepare('SELECT COUNT(*) as n FROM financeiro').get().n === 0) {
   const ins = db.prepare(

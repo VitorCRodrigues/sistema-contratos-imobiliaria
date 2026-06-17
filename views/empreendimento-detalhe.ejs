@@ -29,9 +29,21 @@
 <section class="form-card">
   <h3>Documentos vinculados</h3>
   <div class="actions">
-    <a class="button secondary" href="<%= empreendimento.memorialLink %>" target="_blank">Memorial</a>
-    <a class="button secondary" href="<%= empreendimento.plantaLink %>" target="_blank">Plantas</a>
-    <a class="button secondary" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Tabela de vendas</a>
+    <% if (empreendimento.memorialLink) { %>
+      <a class="button secondary" href="<%= empreendimento.memorialLink %>" target="_blank">Memorial</a>
+    <% } else { %>
+      <button class="button secondary" disabled title="Link não cadastrado">Memorial</button>
+    <% } %>
+    <% if (empreendimento.plantaLink) { %>
+      <a class="button secondary" href="<%= empreendimento.plantaLink %>" target="_blank">Plantas</a>
+    <% } else { %>
+      <button class="button secondary" disabled title="Link não cadastrado">Plantas</button>
+    <% } %>
+    <% if (empreendimento.tabelaVendaLink) { %>
+      <a class="button secondary" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Tabela de vendas</a>
+    <% } else { %>
+      <button class="button secondary" disabled title="Link não cadastrado">Tabela de vendas</button>
+    <% } %>
     <a class="button" href="/espelho?empreendimento=<%= empreendimento.id %>">Abrir espelho</a>
   </div>
 </section>
@@ -47,17 +59,29 @@
 <div class="cards">
   <div class="card">
     <h3>Memorial descritivo</h3>
-    <a class="button" href="<%= empreendimento.memorialLink %>" target="_blank">Abrir</a>
+    <% if (empreendimento.memorialLink) { %>
+      <a class="button" href="<%= empreendimento.memorialLink %>" target="_blank">Abrir</a>
+    <% } else { %>
+      <button class="button" disabled title="Link não cadastrado">Abrir</button>
+    <% } %>
   </div>
 
   <div class="card">
     <h3>Planta</h3>
-    <a class="button" href="<%= empreendimento.plantaLink %>" target="_blank">Abrir</a>
+    <% if (empreendimento.plantaLink) { %>
+      <a class="button" href="<%= empreendimento.plantaLink %>" target="_blank">Abrir</a>
+    <% } else { %>
+      <button class="button" disabled title="Link não cadastrado">Abrir</button>
+    <% } %>
   </div>
 
   <div class="card">
     <h3>Tabela de vendas</h3>
-    <a class="button" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Abrir</a>
+    <% if (empreendimento.tabelaVendaLink) { %>
+      <a class="button" href="<%= empreendimento.tabelaVendaLink %>" target="_blank">Abrir</a>
+    <% } else { %>
+      <button class="button" disabled title="Link não cadastrado">Abrir</button>
+    <% } %>
   </div>
 </div>
 

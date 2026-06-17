@@ -254,8 +254,9 @@ router.post('/contratos/iniciar', (req, res) => {
   };
 
   const templates = templatesMap[categoriaOperacao] || [];
+  const FORM_LINK = 'https://docs.google.com/forms/d/10F6hk-zWLtZkzk2Xhnn-X1Tu5q2UVh9WXmlBOfu_5EU/viewform';
   const ins = db.prepare(
-    'INSERT INTO contratos (id, nome, categoria, status, empreendimentoId, unidadeId, clienteId) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO contratos (id, nome, categoria, status, formLink, empreendimentoId, unidadeId, clienteId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   );
 
   templates.forEach((template, i) => {
@@ -264,6 +265,7 @@ router.post('/contratos/iniciar', (req, res) => {
       template.nome,
       template.categoria,
       'pendente',
+      FORM_LINK,
       empreendimentoId,
       unidadeId ? parseInt(unidadeId) : null,
       parseInt(clienteId)
