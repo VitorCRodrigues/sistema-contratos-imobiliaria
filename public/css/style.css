@@ -285,3 +285,15 @@ textarea {
   background: #dcfce7;
   color: #15803d;
 }
+
+.menu .btn-upload {
+  background: #2563eb;
+  color: #fff;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.menu .btn-upload:hover {
+  background: #1d4ed8;
+}
